@@ -1,0 +1,4 @@
+interface:
+  display_name: "R 两表匹配与对账"
+  short_description: "两表差异核查、相似名称候选与审核后左连接，兼顾空间属性融合"
+  default_prompt: "使用 $r-table-reconciliation-join 检查我的两张表，生成差异与匹配候选，并按审核结果完成左连接。"
