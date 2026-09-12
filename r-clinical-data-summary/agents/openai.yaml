@@ -1,0 +1,4 @@
+interface:
+  display_name: "R 数据整理与描述性统计"
+  short_description: "按变量字典整理医学数据、创建衍生变量与描述表，按需追加单变量分析"
+  default_prompt: "使用 $r-clinical-data-summary 检查项目数据与变量编码表，整理数据并生成所需的描述性统计表。"
