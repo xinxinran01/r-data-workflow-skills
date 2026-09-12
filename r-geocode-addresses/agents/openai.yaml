@@ -1,0 +1,4 @@
+interface:
+  display_name: "R 地址转经纬度"
+  short_description: "机构地址清洗、批量地理编码与坐标核验，保留原始记录和失败状态"
+  default_prompt: "使用 $r-geocode-addresses 检查我的项目地址表，配置地理编码并输出带坐标系和解析状态的结果。"
