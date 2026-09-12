@@ -1,0 +1,30 @@
+args <- commandArgs(trailingOnly = TRUE)
+script <- sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1])
+helper <- file.path(dirname(normalizePath(script)), "helpers.R")
+if (!file.exists(helper)) stop("Geocoding helpers are not implemented yet")
+source(helper, encoding = "UTF-8")
+root <- if (length(args)) args[1] else tempfile("geocode-demo-")
+if (dir.exists(root)) stop("Demo destination exists; choose a new directory")
+init_project(root)
+x <- data.frame(id = c("001", "002", "003"), address = c(" Example Road 1 ", "Example Road 1", NA))
+prepared <- prepare_addresses(x, "address")
+stopifnot(nrow(prepared$queries) == 1L, identical(prepared$rows$id, x$id))
+responses <- data.frame(query_id = prepared$queries$query_id, longitude = 104, latitude = 30,
+                        status = "ok", coord_system = "GCJ-02")
+y <- attach_geocodes(prepared, responses)
+stopifnot(nrow(y) == 3L, y$longitude[1] == y$longitude[2],
+          is.na(y$longitude[3]), y$geocode_status[3] == "missing_address")
+fails <- function(expr) inherits(tryCatch(force(expr), error = identity), "error")
+stopifnot(fails(attach_geocodes(prepared, rbind(responses, responses))))
+bad <- responses; bad$coord_system <- "unknown"
+stopifnot(fails(attach_geocodes(prepared, bad)))
+bad <- responses; bad$longitude <- 181
+stopifnot(fails(attach_geocodes(prepared, bad)))
+bad <- responses; bad$status <- "no_result"
+stopifnot(fails(attach_geocodes(prepared, bad)))
+empty <- prepare_addresses(x[FALSE, ], "address")
+stopifnot(nrow(attach_geocodes(empty, responses[FALSE, ])) == 0L)
+write.csv(x, file.path(root, "01_data/raw/synthetic_addresses.csv"), row.names = FALSE, na = "")
+write.csv(y, file.path(root, "01_data/derived/geocoded_mock.csv"), row.names = FALSE, na = "")
+writeLines("PASS: offline fixture only; no API called; coordinates are synthetic GCJ-02 examples.", file.path(root, "03_output/validation.txt"))
+cat("PASS geocoding helper checks:", normalizePath(root), "\n")
